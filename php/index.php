@@ -1,26 +1,28 @@
 <?php
-
+session_start(); // starta en session
 include 'include/db.php';
 
-$id = 1;
+$filteredId = 1;
 
 if(isset($_GET['id'])) {
-    //använd get id - url?id=ETT ID
-    //$id = $_GET['id'];
-    $filteredID = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    $filteredId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    $_SESSION['id'] = $filteredId; // spara story i session
+} elseif (isset($_SESSION['id'])) {
+    // om session har sparat en story id så ladda denna sida
+    $filteredId = filter_var($_SESSION['id'], FILTER_VALIDATE_INT);
 }
 
 $sth = $dbh->prepare('SELECT * 
                     FROM story
-                    WHERE id = filteredID');
-$sth->bindParam(':filteredID', $filteredID);
+                    WHERE id = :filteredId');
+$sth->bindParam(':filteredId', $filteredId);
 $sth->execute();
 $story = $sth->fetch(PDO::FETCH_ASSOC);
 
 $sth = $dbh->prepare('SELECT * 
                     FROM links
-                    WHERE story_id = :filteredID');
-$sth->bindParam(':filteredID', $filteredID);
+                    WHERE story_id = :filteredId');
+$sth->bindParam(':filteredId', $filteredId);
 $sth->execute();
 $links = $sth->fetchAll(PDO::FETCH_ASSOC);
 
